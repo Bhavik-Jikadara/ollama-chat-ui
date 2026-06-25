@@ -1,6 +1,6 @@
 'use client';
 
-import { Sparkles, User, Bot, Copy, ThumbsUp, ThumbsDown, Check } from 'lucide-react';
+import { Sparkles, Copy, ThumbsUp, ThumbsDown, Check, User, Bot } from 'lucide-react';
 import { Message as MessageType } from '@/types/types';
 import { useState } from 'react';
 
@@ -8,155 +8,175 @@ interface MessageListProps {
     messages: MessageType[];
     selectedModel: string;
     messagesEndRef: React.RefObject<HTMLDivElement | null>;
+    onSendPrompt?: (text: string) => void;
 }
+
+const SUGGESTIONS = [
+    { icon: '💡', label: 'Brainstorm ideas',  prompt: 'Give me 5 creative project ideas I can start this weekend' },
+    { icon: '💻', label: 'Write code',         prompt: 'Write a Python function that reads a CSV and returns summary stats' },
+    { icon: '📚', label: 'Explain something',  prompt: 'Explain how transformers work in simple terms' },
+    { icon: '✍️', label: 'Creative writing',   prompt: 'Write a short story about a robot who learns to paint' },
+];
 
 export const MessageList: React.FC<MessageListProps> = ({
     messages,
     selectedModel,
     messagesEndRef,
+    onSendPrompt,
 }) => {
-    const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
 
-    const copyToClipboard = async (text: string, messageId: string) => {
+    const copyToClipboard = async (text: string, id: string) => {
         try {
             await navigator.clipboard.writeText(text);
-            setCopiedMessageId(messageId);
-            setTimeout(() => setCopiedMessageId(null), 2000);
+            setCopiedId(id);
+            setTimeout(() => setCopiedId(null), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
         }
     };
 
+    /* ── Empty state ─────────────────────────────────────────────────────── */
     if (messages.length === 0) {
         return (
-            <div className="flex-1 overflow-y-auto p-4 md:p-6">
-                <div className="h-full flex items-center justify-center px-4">
-                    <div className="text-center max-w-md w-full">
-                        <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-linear-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                            <Sparkles className="text-white w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" aria-hidden="true" />
+            <div className="flex-1 overflow-y-auto flex items-center justify-center px-4 py-10">
+                <div className="w-full max-w-md text-center">
+                    {/* Icon badge */}
+                    <div className="relative mx-auto w-14 h-14 mb-6">
+                        <div className="w-14 h-14 rounded-2xl bg-violet-600/10 border border-violet-500/20 flex items-center justify-center">
+                            <Sparkles className="w-6 h-6 text-violet-400" aria-hidden="true" />
                         </div>
-                        <h2 className="text-xl md:text-2xl font-bold mb-3 bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                            Start a Conversation
-                        </h2>
-                        <p className="text-gray-400 mb-6 text-sm md:text-base px-2">
-                            Ask me anything or upload documents for RAG-powered answers
-                        </p>
-                        <div className="grid grid-cols-2 gap-2 sm:gap-3 text-sm">
-                            {[
-                                { icon: '💡', title: 'Get Ideas', desc: 'Brainstorm and create' },
-                                { icon: '💻', title: 'Write Code', desc: 'Debug and develop' },
-                                { icon: '📚', title: 'Learn Things', desc: 'Ask questions' },
-                                { icon: '✨', title: 'Be Creative', desc: 'Write and imagine' },
-                            ].map((item) => (
-                                <div
-                                    key={item.title}
-                                    className="p-3 sm:p-4 bg-gray-800/30 rounded-lg border border-gray-700/50 text-left hover:bg-gray-800/50 transition-all cursor-pointer active:scale-[0.98] touch-manipulation"
-                                >
-                                    <div className="text-xl sm:text-2xl mb-1" aria-hidden="true">{item.icon}</div>
-                                    <div className="font-medium text-xs sm:text-sm">{item.title}</div>
-                                    <div className="text-xs text-gray-500 mt-0.5 hidden sm:block">{item.desc}</div>
-                                </div>
-                            ))}
-                        </div>
-                        <p className="mt-6 md:mt-8 text-xs text-gray-500">
-                            Powered by Ollama • Runs locally on your machine
-                        </p>
+                        <span
+                            className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-violet-500 rounded-full border-2 border-[#0d0a1a]"
+                            aria-hidden="true"
+                        />
                     </div>
+
+                    <h2 className="text-lg font-semibold text-white mb-1.5">How can I help you?</h2>
+                    <p className="text-sm text-slate-500 mb-8">
+                        {selectedModel
+                            ? <>Chatting with <span className="text-slate-400 font-medium">{selectedModel}</span></>
+                            : 'Select a model to start chatting'}
+                    </p>
+
+                    {/* Suggestion grid */}
+                    <div className="grid grid-cols-2 gap-2">
+                        {SUGGESTIONS.map(s => (
+                            <button
+                                key={s.label}
+                                type="button"
+                                onClick={() => onSendPrompt?.(s.prompt)}
+                                disabled={!onSendPrompt}
+                                className="group flex flex-col items-start gap-2 p-3.5 rounded-xl bg-white/3 hover:bg-violet-600/10 border border-white/6 hover:border-violet-500/25 text-left transition-all active:scale-[0.98] touch-manipulation disabled:pointer-events-none disabled:opacity-40"
+                            >
+                                <span className="text-xl" aria-hidden="true">{s.icon}</span>
+                                <span className="text-[13px] font-medium text-slate-300 group-hover:text-white leading-tight">
+                                    {s.label}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    <p className="mt-8 text-[11px] text-slate-600">
+                        Powered by Ollama · Runs 100% locally
+                    </p>
                 </div>
             </div>
         );
     }
 
+    /* ── Message list ────────────────────────────────────────────────────── */
     return (
         <div
-            className="flex-1 overflow-y-auto p-3 pb-4 sm:p-4 sm:pb-6 lg:p-6 space-y-5 sm:space-y-6"
+            className="flex-1 overflow-y-auto"
             role="log"
             aria-live="polite"
             aria-label="Chat messages"
         >
-            {messages.map((msg, idx) => (
-                <div
-                    key={msg.id}
-                    className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
-                    style={{ animationDelay: `${idx * 0.02}s` }}
-                >
-                    {/* Bubble width: tighter on mobile, wider on desktop */}
-                    <div className={`
-                        group w-full
-                        max-w-[95%] sm:max-w-[85%] md:max-w-[75%] lg:max-w-3xl
-                        ${msg.role === 'user' ? 'ml-auto' : 'mr-auto'}
-                    `}>
-                        {/* Role label + timestamp */}
-                        <div className="flex items-center gap-2 mb-1 px-1">
+            <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
+                {messages.map((msg, idx) => {
+                    const isUser = msg.role === 'user';
+                    const dateObj = new Date(msg.createdAt);
+
+                    return (
+                        <div
+                            key={msg.id}
+                            className={`flex gap-3 animate-fade-in ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
+                            style={{ animationDelay: `${Math.min(idx * 0.02, 0.3)}s` }}
+                        >
+                            {/* Avatar */}
                             <div
-                                className={`p-1 rounded-full shrink-0 ${msg.role === 'user' ? 'bg-blue-500/20' : 'bg-gray-800'}`}
+                                className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm mt-0.5 ${
+                                    isUser
+                                        ? 'bg-violet-600 text-white'
+                                        : 'bg-[#231a4a] border border-white/8 text-emerald-400'
+                                }`}
                                 aria-hidden="true"
                             >
-                                {msg.role === 'user' ? (
-                                    <User size={13} className="text-blue-400" />
-                                ) : (
-                                    <Bot size={13} className="text-green-400" />
+                                {isUser ? <User size={14} /> : <Bot size={14} />}
+                            </div>
+
+                            {/* Content column */}
+                            <div className={`group flex flex-col gap-1.5 min-w-0 max-w-[84%] ${isUser ? 'items-end' : 'items-start'}`}>
+                                {/* Sender + timestamp */}
+                                <div className={`flex items-center gap-2 px-0.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+                                    <span className="text-xs font-medium text-slate-400">
+                                        {isUser ? 'You' : (selectedModel || 'Assistant')}
+                                    </span>
+                                    <time
+                                        className="text-[11px] text-slate-600"
+                                        dateTime={dateObj.toISOString()}
+                                    >
+                                        {dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </time>
+                                </div>
+
+                                {/* Bubble */}
+                                <div className={`px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap wrap-break-word ${
+                                    isUser
+                                        ? 'bg-violet-600 text-white rounded-tr-sm shadow-lg shadow-violet-950/30'
+                                        : 'bg-[#1a1535] border border-white/8 text-slate-100 rounded-tl-sm'
+                                }`}>
+                                    {msg.content}
+                                </div>
+
+                                {/* Action row — assistant only, reveal on hover */}
+                                {!isUser && (
+                                    <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                                        <button
+                                            type="button"
+                                            onClick={() => copyToClipboard(msg.content, msg.id)}
+                                            className="p-1.5 rounded-lg text-slate-600 hover:text-slate-300 hover:bg-white/6 transition-colors touch-manipulation"
+                                            aria-label={copiedId === msg.id ? 'Copied!' : 'Copy message'}
+                                        >
+                                            {copiedId === msg.id
+                                                ? <Check size={13} className="text-emerald-400" />
+                                                : <Copy size={13} />
+                                            }
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="p-1.5 rounded-lg text-slate-600 hover:text-violet-400 hover:bg-white/6 transition-colors touch-manipulation"
+                                            aria-label="Like this response"
+                                        >
+                                            <ThumbsUp size={13} />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-white/6 transition-colors touch-manipulation"
+                                            aria-label="Dislike this response"
+                                        >
+                                            <ThumbsDown size={13} />
+                                        </button>
+                                    </div>
                                 )}
                             </div>
-                            <span className="text-xs font-semibold text-gray-300 truncate max-w-[100px] sm:max-w-none">
-                                {msg.role === 'user' ? 'You' : selectedModel || 'Assistant'}
-                            </span>
-                            <time
-                                className="text-xs text-gray-500 shrink-0 ml-auto"
-                                dateTime={new Date(msg.createdAt).toISOString()}
-                            >
-                                {new Date(msg.createdAt).toLocaleTimeString([], {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                })}
-                            </time>
                         </div>
+                    );
+                })}
 
-                        {/* Bubble */}
-                        <div
-                            className={`px-3.5 py-3 sm:px-4 sm:py-3.5 md:px-5 md:py-4 rounded-xl sm:rounded-2xl shadow-lg ${
-                                msg.role === 'user'
-                                    ? 'bg-linear-to-br from-blue-600 to-blue-700'
-                                    : 'bg-gray-800/50 backdrop-blur-sm border border-gray-700/50'
-                            }`}
-                        >
-                            <p className="text-sm sm:text-base leading-relaxed whitespace-pre-wrap wrap-break-word">
-                                {msg.content}
-                            </p>
-                        </div>
-
-                        {/* Action bar — always visible on mobile, hover-only on desktop */}
-                        {msg.role === 'assistant' && (
-                            <div className="flex items-center gap-0.5 mt-1.5 sm:opacity-0 sm:translate-y-1 sm:group-hover:opacity-100 sm:group-hover:translate-y-0 sm:transition-all sm:duration-200">
-                                <button
-                                    onClick={() => copyToClipboard(msg.content, msg.id)}
-                                    className="p-2 hover:bg-gray-800 rounded-lg transition-all touch-manipulation"
-                                    aria-label={copiedMessageId === msg.id ? 'Copied' : 'Copy message'}
-                                >
-                                    {copiedMessageId === msg.id ? (
-                                        <Check size={15} className="text-green-400" />
-                                    ) : (
-                                        <Copy size={15} className="text-gray-500 hover:text-gray-300" />
-                                    )}
-                                </button>
-                                <button
-                                    className="p-2 hover:bg-gray-800 rounded-lg transition-all touch-manipulation"
-                                    aria-label="Like this response"
-                                >
-                                    <ThumbsUp size={15} className="text-gray-500 hover:text-gray-300" />
-                                </button>
-                                <button
-                                    className="p-2 hover:bg-gray-800 rounded-lg transition-all touch-manipulation"
-                                    aria-label="Dislike this response"
-                                >
-                                    <ThumbsDown size={15} className="text-gray-500 hover:text-gray-300" />
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            ))}
-            <div ref={messagesEndRef} className="h-2 sm:h-4" aria-hidden="true" />
+                <div ref={messagesEndRef} className="h-1" aria-hidden="true" />
+            </div>
         </div>
     );
 };

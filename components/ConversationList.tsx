@@ -31,7 +31,6 @@ export const ConversationList: React.FC<ConversationListProps> = ({
     onMobileSidebarToggle,
 }) => {
     const [searchQuery, setSearchQuery] = useState('');
-    // Match the `lg:` CSS breakpoint so JS and CSS stay in sync
     const isMobile = useIsMobile(1024);
 
     const formatDate = (date: Date) => {
@@ -52,171 +51,177 @@ export const ConversationList: React.FC<ConversationListProps> = ({
 
     return (
         <>
-            {/* Backdrop — only on mobile when open */}
+            {/* Backdrop */}
             {isMobile && isMobileSidebarOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+                    className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm"
                     onClick={onMobileSidebarToggle}
                     aria-hidden="true"
                 />
             )}
 
-            {/* Sidebar panel */}
             <nav
                 aria-label="Conversations"
                 className={[
-                    // Positioning: overlay on mobile, in-flow on desktop
                     'fixed lg:relative lg:translate-x-0 z-50',
-                    // Width: full-width on xs, fixed panel on sm+, narrower on lg
-                    'w-full sm:w-80 lg:w-64 xl:w-72',
-                    'h-full flex flex-col bg-gray-900 border-r border-gray-800 shadow-2xl',
+                    'w-72 sm:w-72 lg:w-60 xl:w-72',
+                    'h-full flex flex-col',
+                    'bg-[#130f28] border-r border-white/[0.06]',
                     'transition-transform duration-300 ease-in-out',
-                    // Slide in/out only when in mobile mode
                     isMobile
                         ? isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
                         : '',
                 ].join(' ')}
             >
                 {/* ── Header ── */}
-                <div className="p-4 border-b border-gray-800 shrink-0">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3 min-w-0">
+                <div className="px-4 pt-5 pb-4 shrink-0">
+                    <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-2.5 min-w-0">
                             <div
-                                className="w-9 h-9 bg-linear-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shrink-0"
+                                className="w-8 h-8 bg-violet-600 rounded-xl flex items-center justify-center shrink-0"
                                 aria-hidden="true"
                             >
-                                <Sparkles size={18} />
+                                <Sparkles size={15} className="text-white" />
                             </div>
                             <div className="min-w-0">
-                                <h1 className="font-bold text-base bg-linear-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent truncate">
-                                    Ollama UI
-                                </h1>
-                                <p className="text-xs text-gray-500 truncate">Local AI Assistant</p>
+                                <h1 className="font-semibold text-[13px] text-white truncate leading-tight">Ollama UI</h1>
+                                <p className="text-[11px] text-slate-500 truncate">Local AI Assistant</p>
                             </div>
                         </div>
-                        {/* Close button — only needed when sidebar is a drawer */}
                         {isMobile && (
                             <button
                                 onClick={onMobileSidebarToggle}
-                                className="shrink-0 p-2.5 hover:bg-gray-800 rounded-lg touch-manipulation"
+                                className="p-1.5 hover:bg-white/5 rounded-lg touch-manipulation shrink-0"
                                 aria-label="Close sidebar"
                             >
-                                <X size={20} />
+                                <X size={17} className="text-slate-400" />
                             </button>
                         )}
                     </div>
 
                     <button
                         onClick={() => { onCreateConversation(); closeSidebar(); }}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 rounded-xl transition-all touch-manipulation font-medium text-sm"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-violet-600 hover:bg-violet-500 active:bg-violet-700 rounded-xl transition-colors touch-manipulation text-sm font-medium text-white"
                     >
-                        <Plus size={18} aria-hidden="true" />
+                        <Plus size={16} aria-hidden="true" />
                         New Chat
                     </button>
                 </div>
 
                 {/* ── Search ── */}
-                <div className="px-3 py-2.5 border-b border-gray-800 shrink-0">
+                <div className="px-3 pb-3 shrink-0">
                     <div className="relative">
                         <Search
-                            size={14}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+                            size={13}
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"
                             aria-hidden="true"
                         />
                         <input
                             type="search"
-                            placeholder="Search conversations…"
+                            placeholder="Search chats…"
                             value={searchQuery}
                             onChange={e => setSearchQuery(e.target.value)}
                             aria-label="Search conversations"
-                            className="w-full pl-8 pr-3 py-2 bg-gray-800 border border-gray-700/50 rounded-lg text-sm focus:outline-none focus:border-blue-500 placeholder:text-gray-600"
+                            className="w-full pl-8 pr-3 py-2 bg-white/[0.04] border border-white/[0.06] rounded-lg text-[13px] text-slate-300 focus:outline-none focus:border-violet-500/40 focus:bg-white/6 placeholder:text-slate-600 transition-colors"
                         />
                     </div>
                 </div>
 
-                {/* ── Conversation list ── */}
-                <div className="flex-1 overflow-y-auto px-2 py-2">
-                    <p className="text-[10px] text-gray-600 px-2 py-1.5 font-semibold uppercase tracking-widest sticky top-0 bg-gray-900">
-                        Chats ({filtered.length})
-                    </p>
+                {/* ── Divider ── */}
+                <div className="h-px mx-3 bg-white/[0.06] shrink-0" />
+
+                {/* ── List ── */}
+                <div className="flex-1 overflow-y-auto py-2">
+                    {conversations.length > 0 && (
+                        <p className="px-4 py-1.5 text-[10px] font-semibold text-slate-600 uppercase tracking-widest">
+                            {searchQuery ? `${filtered.length} result${filtered.length !== 1 ? 's' : ''}` : `Recent (${conversations.length})`}
+                        </p>
+                    )}
 
                     {filtered.length === 0 ? (
-                        <div className="text-center py-10">
-                            <MessageSquare size={40} className="mx-auto mb-3 text-gray-700" aria-hidden="true" />
-                            <p className="text-sm text-gray-500">
-                                {searchQuery ? 'No matches' : 'No conversations yet'}
+                        <div className="flex flex-col items-center py-12 px-4 text-center">
+                            <div className="w-10 h-10 bg-white/[0.03] rounded-xl flex items-center justify-center mb-3">
+                                <MessageSquare size={18} className="text-slate-600" aria-hidden="true" />
+                            </div>
+                            <p className="text-[13px] text-slate-500 font-medium">
+                                {searchQuery ? 'No matches found' : 'No conversations yet'}
                             </p>
+                            {!searchQuery && (
+                                <p className="text-xs text-slate-600 mt-1">Click New Chat to start</p>
+                            )}
                         </div>
                     ) : (
-                        <ul className="space-y-0.5">
-                            {filtered.map(conv => (
-                                <li key={conv.id}>
-                                    <button
-                                        onClick={() => { onSelectConversation(conv); closeSidebar(); }}
-                                        aria-current={currentConversation?.id === conv.id ? 'page' : undefined}
-                                        className={[
-                                            'group w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left touch-manipulation',
-                                            currentConversation?.id === conv.id
-                                                ? 'bg-blue-600/15 border border-blue-500/25 text-white'
-                                                : 'hover:bg-gray-800/70 text-gray-300 hover:text-white',
-                                        ].join(' ')}
-                                    >
-                                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <ul className="px-2 space-y-px">
+                            {filtered.map(conv => {
+                                const isActive = currentConversation?.id === conv.id;
+                                return (
+                                    <li key={conv.id} className="relative group">
+                                        <button
+                                            type="button"
+                                            onClick={() => { onSelectConversation(conv); closeSidebar(); }}
+                                            aria-current={isActive ? 'page' : undefined}
+                                            className={[
+                                                'w-full flex items-start gap-2.5 px-3 py-2.5 pr-8 rounded-xl transition-colors text-left touch-manipulation',
+                                                isActive
+                                                    ? 'bg-violet-600/12 text-white'
+                                                    : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200',
+                                            ].join(' ')}
+                                        >
+                                            {/* Active left bar */}
+                                            {isActive && (
+                                                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-violet-500 rounded-r-full" aria-hidden="true" />
+                                            )}
+
                                             <MessageSquare
-                                                size={15}
+                                                size={13}
+                                                className={`shrink-0 mt-0.5 ${isActive ? 'text-violet-400' : 'text-slate-600'}`}
                                                 aria-hidden="true"
-                                                className={`shrink-0 ${currentConversation?.id === conv.id ? 'text-blue-400' : 'text-gray-500'}`}
                                             />
-                                            <div className="min-w-0">
-                                                <p className="text-sm font-medium truncate leading-tight">{conv.title}</p>
-                                                <p className="flex items-center gap-1.5 text-xs text-gray-500 mt-0.5">
-                                                    <Clock size={9} aria-hidden="true" />
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-[13px] font-medium truncate leading-snug">{conv.title}</p>
+                                                <p className="flex items-center gap-1 text-[11px] text-slate-600 mt-0.5">
+                                                    <Clock size={8} aria-hidden="true" />
                                                     {conv.messageCount ?? 0} msgs
-                                                    <span className="hidden sm:inline">· {formatDate(conv.updatedAt)}</span>
+                                                    <span className="text-slate-700 hidden sm:inline">·</span>
+                                                    <span className="hidden sm:inline">{formatDate(conv.updatedAt)}</span>
                                                 </p>
                                             </div>
-                                        </div>
+                                        </button>
 
-                                        {/* Delete — visible on hover (desktop) or always on touch */}
-                                        <span
-                                            role="button"
-                                            tabIndex={0}
-                                            onClick={e => { e.stopPropagation(); onDeleteConversation(conv.id); }}
-                                            onKeyDown={e => {
-                                                if (e.key === 'Enter' || e.key === ' ') {
-                                                    e.stopPropagation(); e.preventDefault();
-                                                    onDeleteConversation(conv.id);
-                                                }
-                                            }}
+                                        {/* Delete — sibling button, absolutely positioned */}
+                                        <button
+                                            type="button"
+                                            onClick={() => onDeleteConversation(conv.id)}
                                             aria-label={`Delete: ${conv.title}`}
-                                            className="shrink-0 p-1.5 rounded-lg hover:bg-red-500/20 transition-all touch-manipulation opacity-100 lg:opacity-0 lg:group-hover:opacity-100"
+                                            className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-slate-700 hover:text-red-400 hover:bg-red-500/10 transition-all touch-manipulation opacity-0 group-hover:opacity-100 focus:opacity-100"
                                         >
-                                            <Trash2 size={14} className="text-red-400" />
-                                        </span>
-                                    </button>
-                                </li>
-                            ))}
+                                            <Trash2 size={12} />
+                                        </button>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
                 </div>
 
                 {/* ── Footer ── */}
-                <div className="p-3 border-t border-gray-800 space-y-1 shrink-0">
-                    <button
-                        onClick={() => { onShowSettings(); closeSidebar(); }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-gray-800 rounded-xl transition-all touch-manipulation text-sm text-gray-400 hover:text-white"
-                    >
-                        <Settings size={16} aria-hidden="true" />
-                        Settings
-                    </button>
-                    <div className="flex items-center gap-2 px-3 py-2 text-xs text-gray-600 bg-gray-800/40 rounded-lg">
-                        <Database size={12} aria-hidden="true" />
-                        Local · localStorage
+                <div className="shrink-0">
+                    <div className="h-px mx-3 bg-white/[0.06]" />
+                    <div className="px-3 py-3 space-y-px">
+                        <button
+                            onClick={() => { onShowSettings(); closeSidebar(); }}
+                            className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] text-slate-400 hover:text-white hover:bg-white/[0.05] transition-colors touch-manipulation"
+                        >
+                            <Settings size={14} className="shrink-0" aria-hidden="true" />
+                            Settings
+                        </button>
+                        <div className="flex items-center gap-2 px-3 py-1.5 text-[11px] text-slate-600 rounded-lg">
+                            <Database size={10} aria-hidden="true" />
+                            Stored locally · localStorage
+                        </div>
                     </div>
                 </div>
             </nav>
-
-            {/* FAB removed — header hamburger already handles open on mobile */}
         </>
     );
 };

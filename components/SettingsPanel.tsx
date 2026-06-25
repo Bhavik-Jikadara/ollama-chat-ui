@@ -21,8 +21,14 @@ const DEFAULT_PROMPT = 'You are a helpful AI assistant.';
 
 const STATUS_STYLES: Record<OllamaStatus, string> = {
     connected:   'bg-green-500/15 text-green-400 border-green-500/30',
-    checking:    'bg-blue-500/15 text-blue-400 border-blue-500/30',
+    checking:    'bg-violet-500/15 text-violet-400 border-violet-500/30',
     unavailable: 'bg-red-500/15 text-red-400 border-red-500/30',
+};
+
+const STATUS_LABELS: Record<OllamaStatus, string> = {
+    connected:   'Connected',
+    checking:    'Checking…',
+    unavailable: 'Unavailable',
 };
 
 const StatusIcon = ({ status }: { status: OllamaStatus }) => {
@@ -44,6 +50,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 }) => {
     const [localPrompt, setLocalPrompt] = useState(systemPrompt);
     const [localUrl,    setLocalUrl]    = useState(ollamaUrl);
+    const [urlError,    setUrlError]    = useState('');
     const isMobile = useIsMobile();
 
     const handleSavePrompt = () => {
@@ -58,20 +65,26 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
     const handleConnectUrl = () => {
         const trimmed = localUrl.trim().replace(/\/$/, '');
-        if (trimmed) onOllamaUrlChange(trimmed);
+        if (!trimmed) return;
+        if (!/^https?:\/\//i.test(trimmed)) {
+            setUrlError('URL must start with http:// or https://');
+            return;
+        }
+        setUrlError('');
+        onOllamaUrlChange(trimmed);
     };
 
     const content = (
         <>
             {/* Header */}
             <div className="flex items-center justify-between mb-5 sm:mb-6">
-                <h3 className="text-base font-semibold flex items-center gap-2">
+                <h3 className="text-base font-semibold flex items-center gap-2 text-slate-100">
                     <Settings size={18} aria-hidden="true" />
                     Settings
                 </h3>
                 <button
                     onClick={onClose}
-                    className="p-2.5 hover:bg-gray-800 rounded-lg transition-all touch-manipulation"
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all touch-manipulation text-slate-400 hover:text-slate-200"
                     aria-label="Close settings"
                 >
                     <X size={20} />
@@ -79,48 +92,57 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             </div>
 
             {/* ── Ollama Connection ── */}
-            <section className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-gray-700/60">
+            <section className="mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-white/8">
                 <div className="flex items-center gap-2 mb-3">
-                    <p className="text-sm font-medium text-gray-200">Ollama Connection</p>
+                    <p className="text-sm font-medium text-slate-200">Ollama Connection</p>
                     <span className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full border ${STATUS_STYLES[ollamaStatus]}`}>
                         <StatusIcon status={ollamaStatus} />
-                        {ollamaStatus}
+                        {STATUS_LABELS[ollamaStatus]}
                     </span>
                 </div>
-                <div className="flex gap-2 mb-2">
+                <div className="flex gap-2 mb-1.5">
                     <input
                         type="url"
                         value={localUrl}
-                        onChange={e => setLocalUrl(e.target.value)}
+                        onChange={e => { setLocalUrl(e.target.value); setUrlError(''); }}
                         onKeyDown={e => e.key === 'Enter' && handleConnectUrl()}
                         placeholder="http://localhost:11434"
-                        className="flex-1 px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm font-mono focus:outline-none focus:border-blue-500 transition-colors"
+                        className={`flex-1 px-3 py-2.5 bg-[#1a1535] border rounded-lg text-sm font-mono text-slate-200 focus:outline-none transition-colors ${
+                            urlError
+                                ? 'border-red-500 focus:border-red-500'
+                                : 'border-white/8 focus:border-violet-500/50'
+                        }`}
                         aria-label="Ollama server URL"
+                        aria-invalid={!!urlError}
+                        aria-describedby={urlError ? 'url-error' : undefined}
                     />
                     <button
                         onClick={handleConnectUrl}
-                        className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-lg text-sm font-medium transition-all touch-manipulation shrink-0"
+                        className="px-4 py-2.5 bg-violet-600 hover:bg-violet-500 active:bg-violet-700 rounded-lg text-sm font-medium transition-all touch-manipulation shrink-0 text-white"
                     >
                         Connect
                     </button>
                 </div>
-                <p className="text-xs text-gray-500 leading-relaxed">
+                {urlError && (
+                    <p id="url-error" className="text-xs text-red-400 mb-2">{urlError}</p>
+                )}
+                <p className="text-xs text-slate-500 leading-relaxed">
                     To allow connections from this site, start Ollama with:{' '}
-                    <code className="font-mono text-amber-400 bg-gray-800/60 px-1 rounded">
+                    <code className="font-mono text-amber-400 bg-[#1a1535] px-1 rounded">
                         OLLAMA_ORIGINS=* ollama serve
                     </code>
                 </p>
             </section>
 
             {/* ── Model + Prompt ── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-gray-700/60">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 mb-5 sm:mb-6 pb-5 sm:pb-6 border-b border-white/8">
                 {/* Temperature */}
                 <div>
                     <div className="flex items-center justify-between mb-2">
-                        <label htmlFor="temperature-slider" className="text-sm text-gray-300">
+                        <label htmlFor="temperature-slider" className="text-sm text-slate-300">
                             Temperature
                         </label>
-                        <span className="text-xs font-medium bg-blue-500/20 text-blue-400 px-2 py-1 rounded tabular-nums">
+                        <span className="text-xs font-medium bg-violet-500/20 text-violet-400 px-2 py-1 rounded tabular-nums">
                             {temperature.toFixed(1)}
                         </span>
                     </div>
@@ -132,12 +154,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         step="0.1"
                         value={temperature}
                         onChange={e => onTemperatureChange(parseFloat(e.target.value))}
-                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-500 touch-manipulation"
+                        className="w-full h-2 bg-white/8 rounded-lg appearance-none cursor-pointer accent-violet-500 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-violet-500 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-violet-500 [&::-moz-range-thumb]:border-0 touch-manipulation"
                         aria-valuemin={0}
                         aria-valuemax={2}
                         aria-valuenow={temperature}
                     />
-                    <div className="flex justify-between text-xs text-gray-500 mt-2" aria-hidden="true">
+                    <div className="flex justify-between text-xs text-slate-500 mt-2" aria-hidden="true">
                         <span>Precise</span>
                         <span>Balanced</span>
                         <span>Creative</span>
@@ -147,12 +169,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 {/* System Prompt */}
                 <div>
                     <div className="flex items-center justify-between mb-2">
-                        <label htmlFor="system-prompt" className="text-sm text-gray-300">
+                        <label htmlFor="system-prompt" className="text-sm text-slate-300">
                             System Prompt
                         </label>
                         <button
                             onClick={handleSavePrompt}
-                            className="flex items-center gap-1 text-xs bg-blue-600 hover:bg-blue-700 px-3.5 py-2 rounded-lg transition-all touch-manipulation"
+                            className="flex items-center gap-1 text-xs bg-violet-600 hover:bg-violet-500 px-3.5 py-2 rounded-lg transition-all touch-manipulation text-white"
                         >
                             <Save size={13} aria-hidden="true" />
                             Save
@@ -163,7 +185,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                         value={localPrompt}
                         onChange={e => setLocalPrompt(e.target.value)}
                         rows={4}
-                        className="w-full px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-sm resize-none focus:outline-none focus:border-blue-500 transition-colors"
+                        className="w-full px-3 py-2.5 bg-[#1a1535] border border-white/8 rounded-lg text-sm text-slate-200 resize-none focus:outline-none focus:border-violet-500/50 transition-colors placeholder:text-slate-600"
                         placeholder="Define the AI's behavior and personality…"
                     />
                 </div>
@@ -173,7 +195,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 <button
                     onClick={handleReset}
-                    className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm bg-gray-800 hover:bg-gray-700 rounded-lg transition-all touch-manipulation"
+                    className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm text-slate-300 bg-white/5 hover:bg-white/8 border border-white/8 rounded-lg transition-all touch-manipulation"
                 >
                     <RotateCcw size={15} aria-hidden="true" />
                     Reset Defaults
@@ -200,7 +222,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 aria-label="Settings"
             >
                 <div
-                    className="w-full max-w-lg bg-gray-900 border-t border-gray-700 rounded-t-2xl shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto"
+                    className="w-full max-w-lg bg-[#130f28] border-t border-white/8 rounded-t-2xl shadow-2xl animate-slide-up max-h-[90vh] overflow-y-auto"
                     onClick={e => e.stopPropagation()}
                 >
                     <div className="p-4 sm:p-5">{content}</div>
@@ -211,7 +233,7 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
 
     return (
         <div
-            className="bg-gray-900/95 backdrop-blur-xl border-b border-gray-700/50 p-4 md:p-6 animate-slide-down"
+            className="bg-[#130f28]/95 backdrop-blur-xl border-b border-white/8 p-4 md:p-6 animate-slide-down"
             role="region"
             aria-label="Settings"
         >

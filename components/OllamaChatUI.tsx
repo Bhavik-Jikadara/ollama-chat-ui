@@ -24,64 +24,53 @@ const OllamaOffline = ({
     ollamaUrl: string;
     onRetry: () => void;
 }) => (
-    <div className="flex-1 flex items-center justify-center p-6 bg-gray-900">
+    <div className="flex-1 flex items-center justify-center p-6 bg-[#0d0a1a]">
         {status === 'checking' ? (
             <div className="text-center">
-                <div className="w-14 h-14 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto mb-5" />
-                <p className="text-gray-400 text-sm">Connecting to Ollama…</p>
-                <p className="text-gray-600 text-xs mt-1">{ollamaUrl}</p>
+                <div className="w-12 h-12 border-2 border-violet-500/20 border-t-violet-500 rounded-full animate-spin mx-auto mb-5" />
+                <p className="text-slate-400 text-sm font-medium">Connecting to Ollama…</p>
+                <p className="text-slate-600 text-xs mt-1 font-mono">{ollamaUrl}</p>
             </div>
         ) : (
             <div className="max-w-sm w-full text-center">
-                <div className="w-20 h-20 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-4xl select-none">
+                <div className="w-16 h-16 bg-amber-500/8 border border-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5 text-3xl select-none">
                     🦙
                 </div>
-                <h2 className="text-xl font-bold mb-2">Ollama Not Running</h2>
-                <p className="text-gray-400 text-sm leading-relaxed mb-5">
+                <h2 className="text-lg font-semibold text-white mb-2">Ollama Not Running</h2>
+                <p className="text-slate-400 text-sm leading-relaxed mb-5 px-2">
                     Start Ollama on your machine to chat with local AI models.
                     Everything runs privately — your data never leaves your device.
                 </p>
 
                 {/* Terminal instructions */}
-                <div className="bg-gray-800/80 border border-gray-700/50 rounded-xl p-4 mb-5 text-left space-y-3">
-                    <div>
-                        <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1.5">
-                            1 · Start the server
-                        </p>
-                        <div className="flex items-center gap-2 font-mono text-sm">
-                            <span className="text-gray-600 select-none">$</span>
-                            <code className="text-emerald-400">ollama serve</code>
+                <div className="bg-[#1a1535] border border-white/8 rounded-2xl p-4 mb-5 text-left space-y-3">
+                    {[
+                        { step: '1 · Start the server',      cmd: 'ollama serve',              color: 'text-emerald-400' },
+                        { step: '2 · Allow cross-origin',    cmd: 'OLLAMA_ORIGINS=* ollama serve', color: 'text-amber-400' },
+                        { step: '3 · Pull a model',          cmd: 'ollama pull qwen2.5',       color: 'text-emerald-400' },
+                    ].map((item, i) => (
+                        <div key={i} className={i > 0 ? 'border-t border-white/5 pt-3' : ''}>
+                            <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wider mb-1.5">
+                                {item.step}
+                            </p>
+                            <div className="flex items-center gap-2 font-mono text-sm">
+                                <span className="text-slate-700 select-none">$</span>
+                                <code className={item.color}>{item.cmd}</code>
+                            </div>
                         </div>
-                    </div>
-                    <div className="border-t border-gray-700/50 pt-3">
-                        <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1.5">
-                            2 · Allow this site (for remote access)
-                        </p>
-                        <div className="font-mono text-xs text-gray-400 space-y-1">
-                            <p><span className="text-gray-600">$</span> <code className="text-amber-400">OLLAMA_ORIGINS=* ollama serve</code></p>
-                        </div>
-                    </div>
-                    <div className="border-t border-gray-700/50 pt-3">
-                        <p className="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mb-1.5">
-                            3 · Pull a model
-                        </p>
-                        <div className="flex items-center gap-2 font-mono text-sm">
-                            <span className="text-gray-600 select-none">$</span>
-                            <code className="text-emerald-400">ollama pull qwen2.5</code>
-                        </div>
-                    </div>
+                    ))}
                 </div>
 
                 <button
                     onClick={onRetry}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 rounded-xl transition-all font-medium mb-3 touch-manipulation"
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-violet-600 hover:bg-violet-500 active:bg-violet-700 rounded-xl transition-colors font-medium text-sm mb-3 touch-manipulation"
                 >
-                    <RefreshCw size={18} aria-hidden="true" />
+                    <RefreshCw size={16} aria-hidden="true" />
                     Retry Connection
                 </button>
-                <p className="text-xs text-gray-600">
-                    Connecting to: <span className="font-mono text-gray-500">{ollamaUrl}</span>
-                    <br />Auto-retrying every 5 seconds
+                <p className="text-xs text-slate-600">
+                    <span className="font-mono text-slate-500">{ollamaUrl}</span>
+                    <span className="block mt-0.5">Auto-retrying every 5 s</span>
                 </p>
             </div>
         )}
@@ -259,7 +248,7 @@ const OllamaChatUI = () => {
     const isOffline = ollamaStatus !== 'connected';
 
     return (
-        <div className="flex h-screen bg-gray-900 text-gray-100 overflow-hidden">
+        <div className="flex h-screen bg-[#0d0a1a] text-slate-100 overflow-hidden">
             {/* Sidebar */}
             <ConversationList
                 conversations={conversations}
@@ -276,46 +265,41 @@ const OllamaChatUI = () => {
             <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
                 {/* ── Header ── */}
-                <header className="shrink-0 relative z-10 bg-gray-900/95 backdrop-blur-xl border-b border-gray-700/50 shadow-lg">
-                    <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 h-14 sm:h-16 md:h-17 gap-2">
+                <header className="shrink-0 relative z-10 bg-[#130f28]/95 backdrop-blur-xl border-b border-white/6">
+                    <div className="flex items-center justify-between px-3 sm:px-4 md:px-6 h-14 sm:h-15 gap-2">
 
-                        {/* Left: hamburger + title */}
+                        {/* Left: hamburger + conversation title */}
                         <div className="flex items-center gap-2 min-w-0">
                             {isMobile && (
                                 <button
                                     onClick={() => setIsMobileSidebarOpen(true)}
-                                    className="shrink-0 p-2.5 hover:bg-gray-800 rounded-lg touch-manipulation"
+                                    className="shrink-0 p-2 hover:bg-white/5 rounded-lg touch-manipulation"
                                     aria-label="Open sidebar"
                                 >
-                                    <Menu size={22} />
+                                    <Menu size={20} className="text-slate-400" />
                                 </button>
                             )}
-                            <div className="flex items-center gap-2 min-w-0">
-                                <span className="text-xl sm:text-2xl shrink-0" aria-hidden="true">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <span className="text-xl shrink-0 leading-none" aria-hidden="true">
                                     {selectedModel ? getModelIcon(selectedModel) : '🤖'}
                                 </span>
-                                <div className="min-w-0 hidden sm:block">
-                                    <h2 className="text-sm sm:text-base font-semibold truncate max-w-35 sm:max-w-50 md:max-w-xs lg:max-w-sm">
+                                <div className="min-w-0">
+                                    <h2 className="text-[13px] sm:text-sm font-semibold text-white truncate max-w-35 sm:max-w-50 md:max-w-xs lg:max-w-sm leading-tight">
                                         {currentConversation?.title || 'New Conversation'}
                                     </h2>
-                                    <p className="text-xs text-gray-400 truncate">
+                                    <p className="text-[11px] text-slate-500 truncate hidden sm:block">
                                         {messages.length} message{messages.length !== 1 ? 's' : ''}
-                                        &nbsp;·&nbsp;{selectedModel || 'No model selected'}
-                                    </p>
-                                </div>
-                                <div className="min-w-0 sm:hidden">
-                                    <p className="text-sm font-medium truncate max-w-30">
-                                        {currentConversation?.title || 'New Conversation'}
+                                        {selectedModel && <> · <span className="text-slate-400">{selectedModel}</span></>}
                                     </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Right: error + RAG + model picker */}
+                        {/* Right: error badge + RAG toggle + model picker */}
                         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
                             {error && (
-                                <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-red-900/20 border border-red-700/50 rounded-lg max-w-50 lg:max-w-70">
-                                    <AlertCircle size={14} className="text-red-400 shrink-0" />
+                                <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/25 rounded-lg max-w-50 lg:max-w-64">
+                                    <AlertCircle size={13} className="text-red-400 shrink-0" />
                                     <span className="text-xs text-red-300 truncate">{error}</span>
                                 </div>
                             )}
@@ -327,14 +311,14 @@ const OllamaChatUI = () => {
                                 aria-label={ragEnabled ? 'Disable RAG context' : 'Enable RAG context'}
                                 aria-pressed={ragEnabled}
                                 className={[
-                                    'flex items-center gap-1.5 px-2 sm:px-3 py-2 rounded-lg transition-all border touch-manipulation select-none',
+                                    'flex items-center gap-1.5 px-2 sm:px-3 py-2 rounded-xl border transition-colors touch-manipulation select-none text-xs font-medium',
                                     ragEnabled
-                                        ? 'bg-blue-600/20 border-blue-500/40 text-blue-400'
-                                        : 'bg-gray-800/50 border-gray-700/50 text-gray-500 hover:bg-gray-800 hover:text-gray-300',
+                                        ? 'bg-violet-600/15 border-violet-500/30 text-violet-400'
+                                        : 'bg-white/4 border-white/8 text-slate-500 hover:text-slate-300 hover:bg-white/6',
                                 ].join(' ')}
                             >
-                                <Search size={15} aria-hidden="true" />
-                                <span className="text-xs font-medium hidden md:inline">RAG</span>
+                                <Search size={14} aria-hidden="true" />
+                                <span className="hidden md:inline">RAG</span>
                             </button>
 
                             <ModelDropdown
@@ -351,9 +335,9 @@ const OllamaChatUI = () => {
 
                 {/* Mobile error toast */}
                 {error && isMobile && (
-                    <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-red-900/90 border border-red-700 rounded-lg p-3 shadow-lg max-w-[90vw] animate-slide-down">
+                    <div className="fixed top-16 left-1/2 -translate-x-1/2 z-50 bg-[#130f28] border border-red-500/30 rounded-xl px-4 py-3 shadow-xl max-w-[90vw] animate-slide-down">
                         <div className="flex items-center gap-2">
-                            <AlertCircle size={16} className="text-red-400 shrink-0" />
+                            <AlertCircle size={14} className="text-red-400 shrink-0" />
                             <span className="text-sm text-red-300 wrap-break-word">{error}</span>
                         </div>
                     </div>
@@ -387,6 +371,7 @@ const OllamaChatUI = () => {
                         messages={messages}
                         selectedModel={selectedModel}
                         messagesEndRef={messagesEndRef}
+                        onSendPrompt={sendMessage}
                     />
                 )}
 

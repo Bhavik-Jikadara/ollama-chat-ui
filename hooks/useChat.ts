@@ -12,7 +12,6 @@ function toConversation(s: StoredConversation): Conversation {
         title: s.title,
         createdAt: new Date(s.createdAt),
         updatedAt: new Date(s.updatedAt),
-        userId: 'local',
         messageCount: s.messageCount,
     };
 }

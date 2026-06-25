@@ -11,7 +11,6 @@ export interface Conversation {
     title: string;
     createdAt: Date;
     updatedAt: Date;
-    userId: string;
     messageCount?: number;
 }
 
