@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { RefreshCw } from 'lucide-react';
+import { Analytics } from "@vercel/analytics/next"
 
 const LoadingScreen = () => (
     <div className="flex items-center justify-center h-screen bg-linear-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -19,5 +20,10 @@ const OllamaChatUI = dynamic(() => import('@/components/OllamaChatUI'), {
 });
 
 export default function Home() {
-    return <OllamaChatUI />;
+    return (
+        <>
+            <OllamaChatUI />
+            <Analytics />
+        </>
+    );
 }
